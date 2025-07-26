@@ -30,44 +30,43 @@ DROP FUNCTION IF EXISTS u_Medida;
 GO
 
 CREATE FUNCTION u_Medida (
-    @um_origen_abrev VARCHAR(10),
-    @um_destino_abrev VARCHAR(10),
-    @cantidad FLOAT
+    @um_origen_abrev VARCHAR(10),  -- Declarar el primer argumento (Abreviatura de la unidad de origen)
+    @um_destino_abrev VARCHAR(10), -- Declarar el segundo argumento (Abreviatura de la unidad de destino)
+    @cantidad FLOAT                -- Declarar el tercer argumento (Cantidad a convertir)
 )
 RETURNS FLOAT
 AS
 BEGIN
-    DECLARE @um_origen_id INT;
-    DECLARE @um_destino_id INT;
-    DECLARE @factor FLOAT;
-    DECLARE @resultado FLOAT;
+    DECLARE @um_origen_id INT; -- Declarar variables? 
+    DECLARE @um_destino_id INT; --variable id correspondiante a la unidad de medida destino
+    DECLARE @factor FLOAT; --Varibale del factor de converion entre origen y destino
+    DECLARE @resultado FLOAT; --Varibale para el Resultado final de la conversión
 
-    -- 1. Buscar el ID de la unidad de origen
+    -- Consulta 1 : Buscar el ID de la unidad de origen (El primer parametro)
     SELECT @um_origen_id = um_id
     FROM inv.unidad_medida
     WHERE abreviatura = @um_origen_abrev;
 
-    -- 2. Buscar el ID de la unidad de destino
+    -- Consulta 2 : Buscar el ID de la unidad de destino (El segundo parametro)
     SELECT @um_destino_id = um_id
     FROM inv.unidad_medida
     WHERE abreviatura = @um_destino_abrev;
 
-    -- 3. Buscar el factor de conversión directo (de origen a destino)
+    -- Consulta 3 : Consulta 3: Buscar el valor del factor de conversión de la unidad origen a la unidad destino
     SELECT @factor = factor
     FROM inv.conversion
     WHERE um_origen_id = @um_origen_id
       AND um_destino_id = @um_destino_id;
 
-    -- 4. Calcular el resultado
+    -- Cálculo final: multiplicamos la cantidad por el factor para obtener el resultado de la conversión
     SET @resultado = @cantidad * @factor;
 
     RETURN @resultado;
 END;
 GO
 
--- Convertir 2 kilogramos (kg) a libras (lb)
-SELECT dbo.u_Medida('km', 'lb', 2) AS resultado;
--- Debería devolver: 2 * 2.204623 = 4.409246
+-- Peticion de una conversion 
+SELECT dbo.u_Medida('kg', 'lb', 2) AS resultado;
 
 
 /*
@@ -75,32 +74,29 @@ SELECT dbo.u_Medida('km', 'lb', 2) AS resultado;
 Encuentra las unidades de medida mas utilizadas en la tabla UNIDAD_MEDIDA, muestra las unidades de Medida
 y la cantidad de productos que las utilizan
 */
+
+--Consultas a las tablas a usar
 SELECT * FROM inv.conversion;
 SELECT * FROM inv.unidad_medida;
 SELECT * FROM inv.tipo_unidad_medida;
 
-DROP FUNCTION IF EXISTS unidadMedidaFrecuente;
+DROP FUNCTION IF EXISTS dbo.unidadMedidaFrecuente;
 GO
 
-
-CREATE OR ALTER FUNCTION dbo.unidadMedidaFrecuente()
+-- Retornar una tabla con la cantidad de usos por unidad
+CREATE FUNCTION dbo.unidadMedidaFrecuente()
 RETURNS TABLE
 AS
 RETURN
 (
     SELECT 
-        um.unidad_medida,
-        COUNT(p.producto_id) AS cantidad_productos
-    FROM 
-        inv.unidad_medida um
-    LEFT JOIN 
-        inv.producto p ON um.um_id = p.um_recepcion_id OR um.um_id = p.um_entrega_id
-    GROUP BY 
-        um.unidad_medida
+        um_origen_id AS unidad_id,  
+        COUNT(*) AS cantidad_usos   
+    FROM inv.conversion
+    GROUP BY um_origen_id          
 );
 GO
 
--- Ejemplo de uso
 SELECT *
 FROM dbo.unidadMedidaFrecuente()
-ORDER BY cantidad_productos DESC;
+ORDER BY cantidad_usos DESC;

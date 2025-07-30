@@ -90,10 +90,10 @@ AS
 RETURN
 (
     SELECT 
-        um_origen_id AS unidad_id,  
-        COUNT(*) AS cantidad_usos   
+        um_origen_id AS unidad_id,  -- ID de la unidad de medida que se usa como origen en conversiones
+        COUNT(*) AS cantidad_usos   -- Cuenta cuántas veces se ha usado esa unidad como origen
     FROM inv.conversion
-    GROUP BY um_origen_id          
+    GROUP BY um_origen_id           -- Agrupa por unidad origen para contar las veces que aparece
 );
 GO
 

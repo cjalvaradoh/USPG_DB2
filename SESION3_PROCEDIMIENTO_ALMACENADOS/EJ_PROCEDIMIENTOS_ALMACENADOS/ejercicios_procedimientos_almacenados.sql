@@ -98,7 +98,6 @@ COMMIT TRANSACTION
 ROLLBACK TRANSACTION
 
 
-
 --EJERCICIO, EN CLASE
 /*
 Implementar un procedimiento almacenado que elimine un cliente y todas sus tarjetas de
@@ -124,6 +123,8 @@ USE Ecommerce;
 GO
 SELECT * FROm cli.tarjetas_credito;
 SELECT * FROM cli.clientes;
+SELECT * FROM sell.carrito_compras;
+
 
 -- PROCEDIMIENTO ALMACENADO sp_eliminar_cliente
 CREATE OR ALTER PROCEDURE cli.sp_eliminar_cliente (
@@ -132,6 +133,9 @@ CREATE OR ALTER PROCEDURE cli.sp_eliminar_cliente (
 AS
 BEGIN
     DELETE FROM cli.tarjetas_credito
+    WHERE cliente_id = @clienteId;
+
+	DELETE FROM sell.carrito_compras
     WHERE cliente_id = @clienteId;
 
     DELETE FROM cli.clientes

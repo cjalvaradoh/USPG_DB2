@@ -107,10 +107,10 @@ SELECT
     p.nombre_producto,
     p.marca,
     c.categoria,
-    SUM(dv.cantidad) u30,
-    SUM(dv.cantidad * dv.precio_unitario) m30,
+    SUM(dv.cantidad) unidad_vendida_30,
+    SUM(dv.cantidad * dv.precio_unitario) monto_vendido_30,
     p.stock * p.precio inv,
-    p.stock * 30.0 / SUM(dv.cantidad) dias_cov
+    p.stock * 30.0 / SUM(dv.cantidad) dias_cobertura_30
 FROM sell.productos p
 JOIN sell.categoria c ON p.categoria_id = c.categoria_id
 JOIN sell.detalle_ventas dv ON p.producto_id = dv.producto_id

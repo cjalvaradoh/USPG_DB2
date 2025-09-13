@@ -211,13 +211,11 @@ SELECT
     s.SalesDate,
     DATEPART(YEAR, s.SalesDate) AS anio,
     DATEPART(MONTH, s.SalesDate) AS mes,
-    -- Total mensual por vendedor en región y mes
     SUM(s.SalesAmount) OVER ( PARTITION BY s.SalesRegion,
                      DATEPART(YEAR, s.SalesDate),
                      DATEPART(MONTH, s.SalesDate),
                      s.SalesPersonName
     ) AS total_mensual_vendedor,
-    -- Ranking de vendedor en región y mes
     DENSE_RANK() OVER (
         PARTITION BY s.SalesRegion,
                      DATEPART(YEAR, s.SalesDate),
@@ -229,7 +227,6 @@ SELECT
                          s.SalesPersonName
         ) DESC
     ) AS ranking,
-    -- Cuartil del vendedor en región y mes
     NTILE(4) OVER (
         PARTITION BY s.SalesRegion,
                      DATEPART(YEAR, s.SalesDate),
